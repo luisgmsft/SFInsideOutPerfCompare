@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Name="fabric:/SFInsideOutPerfCompare" xmlns="http://schemas.microsoft.com/2011/01/fabric">
+  <Parameters>
+    <Parameter Name="BackEnd.Core.Stateful_PartitionCount" Value="1" />
+    <Parameter Name="BackEnd.Core.Stateful_MinReplicaSetSize" Value="3" />
+    <Parameter Name="BackEnd.Core.Stateful_TargetReplicaSetSize" Value="3" />
+    <Parameter Name="BackEnd.Core.Stateless_InstanceCount" Value="-1" />
+    <Parameter Name="FrontEnd_InstanceCount" Value="-1" />
+    <Parameter Name="BackEnd.Core.Stateless_RedisCacheConnectionString" Value="YourRedisConnectionHere" />
+  </Parameters>
+</Application>
