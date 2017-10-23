@@ -6,6 +6,6 @@
     <Parameter Name="BackEnd.Core.Stateful_TargetReplicaSetSize" Value="1" />
     <Parameter Name="BackEnd.Core.Stateless_InstanceCount" Value="1" />
     <Parameter Name="FrontEnd_InstanceCount" Value="1" />
-    <Parameter Name="BackEnd.Core.Stateless_RedisCacheConnectionString" Value="YourConnectionHere" />
+    <Parameter Name="BackEnd.Core.Stateless_RedisCacheConnectionString" Value="YourRedisConnectionHere" />
   </Parameters>
 </Application>

@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
+using BackEnd.Core.Stateless.Helpers;
 
 namespace BackEnd.Core.Stateless
 {
@@ -23,6 +25,12 @@ namespace BackEnd.Core.Stateless
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IConnectionMultiplexer>(serviceImplemtation =>
+            {
+                string cacheConnection = ServiceFabricConfiguration.GetConfigurationSettingValue("ConnectionStrings", "RedisCacheConnectionString", "YourRedisCacheConnectionString");
+
+                return ConnectionMultiplexer.Connect(cacheConnection);
+            });
             services.AddMvc();
         }
 

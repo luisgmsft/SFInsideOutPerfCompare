@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Client.BackEnd;
 
 namespace FrontEnd
 {
@@ -21,6 +18,12 @@ namespace FrontEnd
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Using Stateless (Redis based) by default. Switch commented line
+            // to use a Stateful back end (IReliableDictionary based).
+            services.AddSingleton<IBackEndService, StatelessBackEndService>();
+            //services.AddSingleton<IBackEndService, StatefulBackEndService>();
+            //
+
             services.AddMvc();
         }
 

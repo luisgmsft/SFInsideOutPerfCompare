@@ -6,38 +6,31 @@ using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
 using Newtonsoft.Json;
 using BackEnd.Core.Stateless.Helpers;
+using Domain;
 
 namespace BackEnd.Core.Stateless.Controllers
 {
     [Route("api/[controller]")]
     public class AnalysisController : Controller
     {
-        private static Lazy<ConnectionMultiplexer> lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
-        {
-            string cacheConnection = ServiceFabricConfiguration.GetConfigurationSettingValue("ConnectionStrings", "RedisCacheConnectionString", "YourRedisCacheConnectionString");
+        private readonly IConnectionMultiplexer connectionMultiplexer;
 
-            return ConnectionMultiplexer.Connect(cacheConnection);
-        });
-
-        public static ConnectionMultiplexer Connection
+        public AnalysisController(IConnectionMultiplexer connectionMultiplexer)
         {
-            get
-            {
-                return lazyConnection.Value;
-            }
+            this.connectionMultiplexer = connectionMultiplexer;
         }
 
         [HttpPost]
-        public async Task MergeSurveyAnswerToAnalysisAsync([FromBody]string slot, [FromBody]string response)
+        public async Task MergeSurveyAnswerToAnalysisAsync([FromBody]SlotModel model)
         {
             try
             {
-                var surveyAnswersSummaryCache = Connection.GetDatabase();
+                var surveyAnswersSummaryCache = connectionMultiplexer.GetDatabase();
                 var success = false;
 
                 do
                 {
-                    var result = await surveyAnswersSummaryCache.StringGetAsync(slot);
+                    var result = await surveyAnswersSummaryCache.StringGetAsync(model.Slot);
                     var isNew = result.IsNullOrEmpty;
                     var transaction = surveyAnswersSummaryCache.CreateTransaction();
 
@@ -45,19 +38,18 @@ namespace BackEnd.Core.Stateless.Controllers
 
                     if (isNew)
                     {
-                        transaction.AddCondition(Condition.KeyNotExists(slot));
+                        transaction.AddCondition(Condition.KeyNotExists(model.Slot));
                         accumulated += 1;
                     }
                     else
                     {
-                        accumulated = JsonConvert.DeserializeObject<int>(result);
-                        transaction.AddCondition(Condition.StringEqual(slot, ++accumulated));
+                        accumulated = (JsonConvert.DeserializeObject<int>(result)) + 1;
+                        transaction.AddCondition(Condition.StringEqual(model.Slot, result));
                     }
 
-                    ServiceEventSource.Current.Message("Slug name:{0}|Total answers:{1}", slot,
-                        accumulated);
+                    ServiceEventSource.Current.Message($"Slug name:{model.Slot}|Total answers:{accumulated}");
 
-                    transaction.StringSetAsync(slot,
+                    transaction.StringSetAsync(model.Slot,
                             JsonConvert.SerializeObject(accumulated));
 
                     //This is a simple implementation of optimistic concurrency.
@@ -85,7 +77,7 @@ namespace BackEnd.Core.Stateless.Controllers
         {
             try
             {
-                var surveyAnswersSummaryCache = Connection.GetDatabase();
+                var surveyAnswersSummaryCache = connectionMultiplexer.GetDatabase();
 
                 // Look for slug name in the survey answers summary cache
                 var surveyAnswersSummaryInStore = await surveyAnswersSummaryCache.StringGetAsync(slot);

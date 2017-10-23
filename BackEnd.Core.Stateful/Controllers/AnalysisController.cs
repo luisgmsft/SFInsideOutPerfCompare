@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Data.Collections;
+using Domain;
 
 namespace BackEnd.Core.Stateful.Controllers
 {
@@ -20,7 +21,7 @@ namespace BackEnd.Core.Stateful.Controllers
         }
 
         [HttpPost]
-        public async Task MergeSurveyAnswerToAnalysisAsync([FromBody]string slot, [FromBody]string response)
+        public async Task MergeSurveyAnswerToAnalysisAsync([FromBody]SlotModel model)
         {
             try
             {
@@ -28,7 +29,7 @@ namespace BackEnd.Core.Stateful.Controllers
 
                 using (var tx = _stateManager.CreateTransaction())
                 {
-                    var conditional = await reliableDictionary.TryGetValueAsync(tx, slot);
+                    var conditional = await reliableDictionary.TryGetValueAsync(tx, model.Slot);
                     var accumulated = 0;
 
                     if (!conditional.HasValue)
@@ -40,11 +41,10 @@ namespace BackEnd.Core.Stateful.Controllers
                         accumulated = conditional.Value + 1;
                     }
 
-                    ServiceEventSource.Current.Message("Slug name:{0}|Total answers:{1}", slot,
-                        accumulated);
+                    ServiceEventSource.Current.Message($"Slug name:{model.Slot}|Total answers:{accumulated}");
 
-                    await reliableDictionary.AddOrUpdateAsync(tx, slot, accumulated, (key, element) => {
-                        return element;
+                    await reliableDictionary.AddOrUpdateAsync(tx, model.Slot, accumulated, (key, element) => {
+                        return accumulated;
                     });
 
                     await tx.CommitAsync();

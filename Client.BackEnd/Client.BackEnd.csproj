@@ -86,9 +86,17 @@
     <Compile Include="Helpers\HttpExceptionHandler.cs" />
     <Compile Include="IBackEndService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StatefulBackEndService.cs" />
+    <Compile Include="StatelessBackEndService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj">
+      <Project>{40269839-73e2-4a54-ba65-7c8b8513aa9b}</Project>
+      <Name>Domain</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
