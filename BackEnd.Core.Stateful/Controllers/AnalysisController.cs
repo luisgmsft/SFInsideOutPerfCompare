@@ -29,7 +29,7 @@ namespace BackEnd.Core.Stateful.Controllers
 
                 using (var tx = _stateManager.CreateTransaction())
                 {
-                    var conditional = await reliableDictionary.TryGetValueAsync(tx, model.Slot);
+                    var conditional = await reliableDictionary.TryGetValueAsync(tx, model.Slot, LockMode.Update);
                     var accumulated = 0;
 
                     if (!conditional.HasValue)
