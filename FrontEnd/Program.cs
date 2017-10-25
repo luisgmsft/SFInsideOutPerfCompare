@@ -1,8 +1,8 @@
 ﻿using Microsoft.ServiceFabric.Services.Runtime;
 using System;
 using System.Diagnostics;
+using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace FrontEnd
 {
@@ -22,6 +22,11 @@ namespace FrontEnd
 
                 ServiceRuntime.RegisterServiceAsync("FrontEndType",
                     context => new FrontEnd(context)).GetAwaiter().GetResult();
+
+                ServicePointManager.DefaultConnectionLimit = int.MaxValue;
+                ServicePointManager.UseNagleAlgorithm = false;
+                ServicePointManager.Expect100Continue = false;
+
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(FrontEnd).Name);
 
